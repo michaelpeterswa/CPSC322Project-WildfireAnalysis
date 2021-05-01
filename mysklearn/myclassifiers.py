@@ -1,5 +1,6 @@
 import mysklearn.myutils as myutils
 import copy
+import mysklearn.myevaluation as myevaluation
 
 class MySimpleLinearRegressor:
     """Represents a simple linear regressor.
@@ -377,3 +378,43 @@ class MyDecisionTreeClassifier:
             You will need to install graphviz in the Docker container as shown in class to complete this method.
         """
         pass # TODO: (BONUS) fix this
+
+class MyRandomForestClassifier:
+
+    def __init__(self):
+        self.X_train = None 
+        self.y_train = None
+        self.trees = None
+
+    def fit(self, X_train, y_train):
+        self.X_train = copy.deepcopy(X_train)
+        self.y_train = copy.deepcopy(y_train)
+
+
+        M = 7
+        N = 20
+        F = 2
+
+        # create random stratified test set with 2:1 ratio     
+        X_remainder, X_test, y_remainder, y_test = myevaluation.train_test_split(copy.deepcopy(X_train), copy.deepcopy(y_train))
+
+        for i,x in enumerate(y_remainder):
+            X_remainder[i].append(x)
+        for i,x in enumerate(y_test):
+            X_test[i].append(x)
+        # generate N random decision trees using bagging
+        for i in range(N):
+            sample = myutils.compute_bootstrapped_sample(X_remainder)
+            print("got sample")
+            validation_set = []
+            for x in X_remainder:
+                if x not in sample:
+                    validation_set.append(x)
+            print("got validation set")
+            available_attributes = myutils.get_available_attributes(sample)
+            print(len(sample), len(validation_set), (len(sample)*100)/(len(sample) + len(validation_set)), (len(validation_set)*100)/(len(sample) + len(validation_set)))
+        # split up each decsion tree using remainder set: 63% training, 37 validation
+
+
+    def predict(self, X_test):
+        pass

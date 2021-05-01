@@ -404,3 +404,21 @@ def tdidt_print_rules(tree, rule, class_name, default_header, attribute_names):
             tdidt_print_rules(value_list[2], rule2, class_name, default_header, attribute_names)
     else: # "Leaf"
         print(rule, "THEN", class_name, "=", tree[1])
+
+def compute_bootstrapped_sample(table):
+    n = len(table)
+    sample = []
+    for _ in range(n):
+        rand_index = random.randrange(0, n)
+        sample.append(table[rand_index])
+    return sample
+
+def get_available_attributes(table):
+    available_attributes = {}
+    for i in range(0, len(table[0])):
+        att = "att"+str(i)
+        available_attributes[att] = []
+        for x in table:
+            if x[i] not in available_attributes[att]:
+                available_attributes[att].append(x[i])
+    return available_attributes
