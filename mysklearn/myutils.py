@@ -404,3 +404,74 @@ def tdidt_print_rules(tree, rule, class_name, default_header, attribute_names):
             tdidt_print_rules(value_list[2], rule2, class_name, default_header, attribute_names)
     else: # "Leaf"
         print(rule, "THEN", class_name, "=", tree[1])
+
+def compute_bootstrapped_sample(table):
+    n = len(table)
+    sample = []
+    for _ in range(n):
+        rand_index = random.randrange(0, n)
+        sample.append(table[rand_index])
+    return sample
+
+def get_available_attributes(table):
+    available_attributes = {}
+    for i in range(0, len(table[0])):
+        att = "att"+str(i)
+        available_attributes[att] = []
+        for x in table:
+            if x[i] not in available_attributes[att]:
+                available_attributes[att].append(x[i])
+    return available_attributes
+
+def compute_random_subset(values, num_values):
+    shuffled = values[:] # shallow copy 
+    random.shuffle(shuffled)
+    return sorted(shuffled[:num_values])
+
+def tdidt_random_forest(current_instances, att_indexes, att_domains, F):
+
+    # print(att_indexes)
+    att_indexes2 = copy.deepcopy(att_indexes)
+    if(len(att_indexes) > F):
+        compute_random_subset(att_indexes, F)
+    split_attribute = select_attribute(current_instances, att_indexes2, att_domains)
+    # print("TEST", split_attribute, "T", att_indexes)
+    class_label = "att"+str(split_attribute)
+    att_indexes2 = copy.deepcopy(att_indexes)
+    att_indexes2.remove(split_attribute)
+    
+    partitions = {}
+    attributes = att_domains[class_label]
+    for a in attributes:
+        partitions[a] = []
+    for instance in current_instances:
+        partitions[instance[split_attribute]].append(instance)
+    
+    tree = ["Attribute", "att"+str(split_attribute)]
+
+    for attribute_value, partition in partitions.items():
+        values_subtree = ["Value", attribute_value]
+
+        if len(partition) > 0 and all_same_class(partition):
+            leaf = ["Leaf", partition[0][-1], len(partition), len(current_instances)]
+            values_subtree.append(leaf)
+            tree.append(values_subtree)
+        #    CASE 2: no more attributes to select (clash) => handle clash w/majority vote leaf node
+        elif len(partition) > 0 and len(att_indexes2) == 0:
+            partition_stats = compute_partition_stats(partition, -1)
+            partition_stats.sort(key=lambda x: x[1])
+            leaf = ["Leaf", partition_stats[-1][0], len(partition), len(current_instances)]
+            values_subtree.append(leaf)
+            tree.append(values_subtree)
+            
+        #    CASE 3: no more instances to partition (empty partition) => backtrack and replace attribute node with majority vote leaf node
+        elif len(partition) == 0:
+            partition_stats = compute_partition_stats(current_instances, -1)
+            partition_stats.sort(key=lambda x: x[1])
+            leaf = ["Leaf", partition_stats[-1][0], len(partition), len(current_instances)]
+            return leaf
+        else: # all base cases are false, recurse!!
+            subtree = tdidt_random_forest(partition, att_indexes2, att_domains, F)
+            values_subtree.append(subtree)
+            tree.append(values_subtree)
+    return tree
