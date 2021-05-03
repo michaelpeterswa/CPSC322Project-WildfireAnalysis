@@ -62,7 +62,7 @@ def unBinAcres(acres_binned):
         return "2000-10000"
     if acres_binned == 8:
         return "10000-50000"
-    return "5000-"
+    return "50000-"
 
 def acres_to_circle_radius_in_miles(acres):
     sqft = acres * 43560
