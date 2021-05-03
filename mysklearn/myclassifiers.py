@@ -386,7 +386,7 @@ class MyRandomForestClassifier:
         self.y_train = None
         self.trees = None
 
-    def fit(self, X_train, y_train):
+    def fit(self, X_train, y_train, M=7, N=20, F=2):
         """Fits a random forest classifier to X_train and y_train using the TDIDT (top down induction of decision tree) algorithm.
 
         Args:
@@ -398,11 +398,6 @@ class MyRandomForestClassifier:
         self.X_train = copy.deepcopy(X_train)
         self.y_train = copy.deepcopy(y_train)
 
-
-        M = 7
-        N = 20
-        F = 2
-
         # create random stratified test set with 2:1 ratio     
         X_remainder, X_test, y_remainder, y_test = myevaluation.train_test_split(copy.deepcopy(X_train), copy.deepcopy(y_train))
 
@@ -413,21 +408,21 @@ class MyRandomForestClassifier:
         # generate N random decision trees using bagging
         trees = []
         for i in range(N):
-            print(i)
-            print("getting sample and validation sets...")
+            # print(i)
+            # print("getting sample and validation sets...")
             # get the sample and validation sets
             sample = myutils.compute_bootstrapped_sample(X_remainder)
             validation_set = []
             for x in X_remainder:
                 if x not in sample:
                     validation_set.append(x)
-            print("length of sample and validation sets:", len(sample), len(validation_set))
-            print("getting the tree...")
+            # print("length of sample and validation sets:", len(sample), len(validation_set))
+            # print("getting the tree...")
             # get the tree from the sample
             available_attributes = myutils.get_available_attributes(sample)
             tree = myutils.tdidt_random_forest(sample, [x for x in range(0, len(sample[0])-1)], available_attributes, F)
             
-            print("testing the tree")
+            # print("testing the tree")
             # test against the validation set
             validation_set_x = [x[:-1] for x in validation_set]
             validation_set_y = [x[-1] for x in validation_set]
@@ -439,10 +434,10 @@ class MyRandomForestClassifier:
                 prediction = myutils.tdidt_predict(header, tree, x)
                 predictions.append(int(prediction == y))
             
-            print("accuracy:", sum(predictions)/len(predictions))
+            # print("accuracy:", sum(predictions)/len(predictions))
             trees.append({"accuracy": sum(predictions)/len(predictions), "tree": tree})
         
-        print("getting the best M trees")
+        # print("getting the best M trees")
         # get the best M of N trees
         trees = sorted(trees, key=lambda k: k["accuracy"], reverse=True) 
         self.trees = trees[:M]
