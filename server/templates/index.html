@@ -25,15 +25,60 @@
       <h1 class="mt-5">WildfireAnalysis</h1>
       <p class="lead">Input data here.</p>
       <br>
-      <form method="POST" action="/api">
+      <form method="GET" action="/api/predict">
         <div class="form-group">
-          <div class="input-group mb-3">
-            <input type="url" id="url" name="url" class="form-control" placeholder="Data" aria-label="Link for shortening" aria-describedby="basic-addon2">
-            <div class="input-group-append">
-              <button class="btn btn-outline-secondary" type="submit">Submit</button>
-            </div>
+          <div class="form-group row">
+            <label for="month" class="col-sm-2 col-form-label">Month</label>
+            <div class="col-sm-10">
+              <select class="form-control" name="month" id="month">
+                {% for val in mth %}
+                  <option>{{ val }}</option>
+                {% endfor %} 
+              </select> 
+            </div>  
+          </div>  
+          <div class="form-group row">
+            <label for="county" class="col-sm-2 col-form-label">County</label>
+            <div class="col-sm-10">
+              <select class="form-control" name="county" id="county">
+                {% for val in cnt %}
+                  <option>{{ val }}</option>
+                {% endfor %} 
+              </select> 
+            </div>  
           </div>
-          <small id="urlHelp" class="form-text text-muted">Please paste complete data here.</small>
+          <div class="form-group row">
+            <label for="cause" class="col-sm-2 col-form-label">Cause</label>
+            <div class="col-sm-10">
+              <select class="form-control" name="cause" id="cause">
+                {% for val in cau %}
+                  <option>{{ val }}</option>
+                {% endfor %} 
+              </select> 
+            </div>  
+          </div>
+          <div class="form-group row">
+            <label for="binlat" class="col-sm-2 col-form-label">Latitude Bin</label>
+            <div class="col-sm-10">
+              <select class="form-control" name="binlat" id="binlat">
+                {% for val in lat %}
+                  <option>{{ val }}</option>
+                {% endfor %} 
+              </select> 
+            </div>  
+          </div>
+          <div class="form-group row">
+            <label for="binlon" class="col-sm-2 col-form-label">Longitude Bin</label>
+            <div class="col-sm-10">
+              <select class="form-control" name="binlon" id="binlon">
+                {% for val in lon %}
+                  <option>{{ val }}</option>
+                {% endfor %} 
+              </select> 
+            </div>  
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>   
+          <small id="urlHelp" class="form-text text-muted">Please select complete data here.</small>
         </div>
 
         <div id="result">

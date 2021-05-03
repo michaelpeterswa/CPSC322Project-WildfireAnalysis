@@ -7,62 +7,65 @@ import pickle
 app = Flask(__name__)
 CORS(app)
 
-months = ['Oct', 'Mar', 'Feb', 'May', 'Nov', 'Dec', 'Apr', 'Aug', 'Jan', 'Sep', 'Jul', 'Jun']
-counties = ['GARFIELD', 'WALLA WALLA', 'GRAYS HARBOR', 'FERRY', 'OKANOGAN', 'LINCOLN', 'STEVENS', 'PIERCE', 'COWLITZ', 'YAKIMA', 'PACIFIC', 'ASOTIN', 'CHELAN', 'DOUGLAS', 'WHITMAN', 'SKAMANIA', 'GRANT', 'KLICKITAT', 'KING', 'MASON', 'FRANKLIN', 'JEFFERSON', 'KITTITAS', 'ADAMS', 'SAN JUAN', 'SPOKANE', 'BENTON', 'ISLAND', 'KITSAP', 'NO DATA', 'WHATCOM', 'THURSTON', 'CLALLAM', 'SKAGIT', 'LEWIS', 'WAHKIAKUM', 'SNOHOMISH', 'COLUMBIA', 'CLARK', 'PEND OREILLE']
-causes = ['Railroad', 'Arson', 'Recreation', 'Under Invest', 'Logging', 'Children', 'Lightning', 'Debris Burn', 'Miscellaneou', 'None', 'Undetermined', 'Smoker']
-binlat = [1, 2, 3, 4]
-binlon = [1, 2, 3, 4, 5, 6, 7, 8]
-binacres = [2, 3, 4, 5, 6, 7, 8, 9]
+uniq_fire_date = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+uniq_county = ['No Data', 'Skamania', 'Cowlitz', 'Thurston', 'Okanogan', 'Pacific', 'Clark', 'Columbia', 'Grays Harbor', 'Adams', 'Benton', 'Asotin', 'Stevens', 'Chelan', 'Klickitat', 'King', 'Lewis', 'Douglas', 'Franklin', 'Jefferson', 'San Juan', 'Kittitas', 'Garfield', 'Grant', 'Pierce', 'Wahkiakum', 'Ferry', 'Clallam', 'Spokane', 'Mason', 'Skagit', 'Pend Oreille', 'Walla Walla', 'Whatcom', 'Kitsap', 'Lincoln', 'Island', 'Snohomish', 'Yakima', 'Whitman']
+uniq_cause = ['Smoker', 'Miscellaneou', 'Under Invest', 'Logging', 'Debris Burn', 'Undetermined', 'Recreation', 'Railroad', 'Lightning', 'Children', 'Arson', 'None']
+uniq_binlat = [1, 2, 3, 4]
+uniq_binlon = [1, 2, 3, 4, 5, 6, 7, 8]
+uniq_binacres = [2, 3, 4, 5, 6, 7, 8, 9]
 
-def binLat(lat):
-    print(lat)
-    if lat > 48:
-        return 1
-    elif 48 >= lat > 47:
-        return 2
-    elif 47 >= lat > 46:
-        return 3
-    elif 46 >= lat > 45:
-        return 4
-    else:
-        return 5
+# def binLat(lat):
+#     print(lat)
+#     if lat > 48:
+#         return 1
+#     elif 48 >= lat > 47:
+#         return 2
+#     elif 47 >= lat > 46:
+#         return 3
+#     elif 46 >= lat > 45:
+#         return 4
+#     else:
+#         return 5
 
-def binLon(lon):
-    if lon < -124:
-        return 1
-    elif -124 <= lon < -123:
-        return 2
-    elif -123 <= lon < -122:
-        return 3
-    elif -122 <= lon < -121:
-        return 4
-    elif -121 <= lon < -120:
-        return 5
-    elif -120 <= lon < -119:
-        return 6
-    elif -119 <= lon < -118:
-        return 7
-    else:
-        return 8
+# def binLon(lon):
+#     if lon < -124:
+#         return 1
+#     elif -124 <= lon < -123:
+#         return 2
+#     elif -123 <= lon < -122:
+#         return 3
+#     elif -122 <= lon < -121:
+#         return 4
+#     elif -121 <= lon < -120:
+#         return 5
+#     elif -120 <= lon < -119:
+#         return 6
+#     elif -119 <= lon < -118:
+#         return 7
+#     else:
+#         return 8
 
 def unBinAcres(acres_binned):
     if acres_binned == 1:
         return "0-2"
-    if acres_binned == 2:
+    elif acres_binned == 2:
         return "2-10"
-    if acres_binned == 3:
+    elif acres_binned == 3:
         return "10-50"
-    if acres_binned == 4:
+    elif acres_binned == 4:
         return "50-100"
-    if acres_binned == 5:
+    elif acres_binned == 5:
         return "100-500"
-    if acres_binned == 6:
+    elif acres_binned == 6:
         return "500-2000"
-    if acres_binned == 7:
+    elif acres_binned == 7:
         return "2000-10000"
-    if acres_binned == 8:
+    elif acres_binned == 8:
         return "10000-50000"
-    return "50000-"
+    elif acres_binned == 9:
+        return "50000-300000"
+    else:
+        return "Failure to Compute..."
 
 def acres_to_circle_radius_in_miles(acres):
     sqft = acres * 43560
@@ -71,7 +74,13 @@ def acres_to_circle_radius_in_miles(acres):
 
 @app.route('/', methods=['GET'])
 def main_route():
-     return render_template('index.html')
+     return render_template('index.html', 
+                            mth=uniq_fire_date, 
+                            cnt=uniq_county, 
+                            cau=uniq_cause, 
+                            lat=uniq_binlat, 
+                            lon=uniq_binlon, 
+                            acr=uniq_binacres)
 
 @app.route('/api/predict', methods=["GET"])
 def return_prediction():
@@ -79,12 +88,12 @@ def return_prediction():
 
     cause = request.args.get("cause", "")
     county = request.args.get("county", "")
-    fire_date = request.args.get("date", "")
-    lat = request.args.get("lat", "")
-    lon = request.args.get("lon", "")
+    fire_date = request.args.get("month", "")
+    lat = request.args.get("binlat", "")
+    lon = request.args.get("binlon", "")
 
-    lat = binLat(float(lat))
-    lon = binLon(float(lon))
+    # lat = binLat(float(lat))
+    # lon = binLon(float(lon))
 
     instance = [fire_date, county, cause, lat, lon]
 
@@ -93,6 +102,7 @@ def return_prediction():
     infile.close()
 
     prediction = predict_acres([instance], best_trees)
+    print(prediction)
     
     if prediction is not None:
         acres_binned = prediction[0]
@@ -101,8 +111,6 @@ def return_prediction():
     else: 
         # failure!!
         return "Error making prediction", 400
-
-
 
 def predict_acres(X_test, best_trees):
     header = []
