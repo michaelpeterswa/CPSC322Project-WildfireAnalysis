@@ -24,7 +24,6 @@
     <main role="main" class="container">
       <h1 class="mt-5">WildfireAnalysis</h1>
       <p class="lead">Input data here.</p>
-      <br>
       <form method="GET" action="/api/predict">
         <div class="form-group">
           <div class="form-group row">
@@ -77,13 +76,18 @@
               </select> 
             </div>  
           </div>
+          <div class="container-sm">
+            <img src="static/latlongmap.png" class="img-fluid img-thumbnail" alt="Responsive image">
+          </div>
+          <br>
           <button type="submit" class="btn btn-primary">Submit</button>   
-          <small id="urlHelp" class="form-text text-muted">Please select complete data here.</small>
+          <br>
+          <small id="urlHelp" class="form-text text-muted">Please submit complete data here.</small>
         </div>
 
-        <div id="result">
-          
-        </div>
+        <br>
+        <br>
+        <br>
   
       </form>
       

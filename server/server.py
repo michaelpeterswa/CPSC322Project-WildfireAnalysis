@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import math
 import pickle
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -14,38 +15,12 @@ uniq_binlat = [1, 2, 3, 4]
 uniq_binlon = [1, 2, 3, 4, 5, 6, 7, 8]
 uniq_binacres = [2, 3, 4, 5, 6, 7, 8, 9]
 
-# def binLat(lat):
-#     print(lat)
-#     if lat > 48:
-#         return 1
-#     elif 48 >= lat > 47:
-#         return 2
-#     elif 47 >= lat > 46:
-#         return 3
-#     elif 46 >= lat > 45:
-#         return 4
-#     else:
-#         return 5
-
-# def binLon(lon):
-#     if lon < -124:
-#         return 1
-#     elif -124 <= lon < -123:
-#         return 2
-#     elif -123 <= lon < -122:
-#         return 3
-#     elif -122 <= lon < -121:
-#         return 4
-#     elif -121 <= lon < -120:
-#         return 5
-#     elif -120 <= lon < -119:
-#         return 6
-#     elif -119 <= lon < -118:
-#         return 7
-#     else:
-#         return 8
+infile = "trees.p"
+with open(infile, 'rb') as f:
+    best_trees = pickle.load(f)
 
 def unBinAcres(acres_binned):
+    print(acres_binned)
     if acres_binned == 1:
         return "0-2"
     elif acres_binned == 2:
@@ -92,17 +67,31 @@ def return_prediction():
     lat = request.args.get("binlat", "")
     lon = request.args.get("binlon", "")
 
-    # lat = binLat(float(lat))
-    # lon = binLon(float(lon))
+    instance = [fire_date, county, cause, lat, lon]
+
+    prediction = predict_acres([instance], best_trees)
+    
+    if prediction is not None:
+        acres_binned = prediction[0]
+        return render_template('result.html', result=unBinAcres(acres_binned))
+    
+    else: 
+        # failure!!
+        return "Error making prediction", 400
+
+@app.route('/api/predict_raw', methods=["GET"])
+def return_prediction_raw():
+    acres = 10000
+
+    cause = request.args.get("cause", "")
+    county = request.args.get("county", "")
+    fire_date = request.args.get("month", "")
+    lat = request.args.get("binlat", "")
+    lon = request.args.get("binlon", "")
 
     instance = [fire_date, county, cause, lat, lon]
 
-    infile = open("trees.p", "rb")
-    best_trees = pickle.load(infile)
-    infile.close()
-
     prediction = predict_acres([instance], best_trees)
-    print(prediction)
     
     if prediction is not None:
         acres_binned = prediction[0]
@@ -147,4 +136,5 @@ def tdidt_predict(header, tree, instance):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8888)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
